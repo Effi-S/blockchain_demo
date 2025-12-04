@@ -10,10 +10,8 @@ import (
 	"rsc.io/quote"
 )
 
-func main() {
+func run() {
 	start := time.Now()
-
-	config.Init(config.Default())
 
 	chain := block.GetBlockChain()
 
@@ -32,4 +30,13 @@ func main() {
 	}
 
 	fmt.Printf("took %s\n", time.Since(start))
+}
+
+func main() {
+	config.SetNumWorkers(20)
+	fmt.Println("Running with 20 workers")
+	run()
+	config.SetNumWorkers(1)
+	fmt.Println("Running with 1 worker")
+	run()
 }

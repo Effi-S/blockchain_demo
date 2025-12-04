@@ -1,5 +1,9 @@
 package config
 
+import "sync"
+
+var once sync.Once
+
 // Config holds cross-cutting configuration values for the blockchain
 type Config struct {
 	NumWorkers int
@@ -9,25 +13,20 @@ type Config struct {
 // Default returns a Config with default values
 func Default() *Config {
 	return &Config{
-		NumWorkers: 12,
-		Difficulty: 15,
+		NumWorkers: 20,
+		Difficulty: 20,
 	}
 }
 
 // Global configuration instance
 var global *Config
 
-// Init initializes the global configuration with the provided config
-func Init(cfg *Config) {
-	global = cfg
-}
-
 // Get returns the global configuration instance
 // If not initialized, returns default configuration
 func Get() *Config {
-	if global == nil {
+	once.Do(func() {
 		global = Default()
-	}
+	})
 	return global
 }
 
