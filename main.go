@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Effi-S/go-blockchain/blockchain/block"
+	"github.com/Effi-S/go-blockchain/blockchain/config"
 	"github.com/Effi-S/go-blockchain/blockchain/proof"
 	"rsc.io/quote"
 )
@@ -12,13 +13,14 @@ import (
 func main() {
 	start := time.Now()
 
-	numWorkers := 12
+	config.Init(config.Default())
+
 	chain := block.GetBlockChain()
 
-	chain.AddBlock(quote.Hello(), numWorkers)
-	chain.AddBlock(quote.Glass(), numWorkers)
-	chain.AddBlock(quote.Opt(), numWorkers)
-	chain.AddBlock(quote.Go(), numWorkers)
+	chain.AddBlock(quote.Hello())
+	chain.AddBlock(quote.Glass())
+	chain.AddBlock(quote.Opt())
+	chain.AddBlock(quote.Go())
 
 	fmt.Println()
 	for i, b := range chain.Blocks {

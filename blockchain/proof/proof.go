@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+
+	"github.com/Effi-S/go-blockchain/blockchain/config"
 )
 
 // Take the data from the block
@@ -16,8 +18,6 @@ import (
 // check the hash to see if it meets a set of requirements
 // Requirements:
 // The first few bytes must contain 0s
-
-const Difficulty = 15
 
 type ProofOfWork struct {
 	PrevHash []byte
@@ -31,8 +31,9 @@ type PowResult struct {
 }
 
 func NewProofOfWork(prevHash []byte, data []byte) *ProofOfWork {
+	difficulty := config.Difficulty()
 	target := big.NewInt(1)
-	target.Lsh(target, uint(256-Difficulty))
+	target.Lsh(target, uint(256-difficulty))
 
 	pow := &ProofOfWork{
 		PrevHash: prevHash,
@@ -53,11 +54,12 @@ func ToHex(num int64) []byte {
 }
 
 func (pow *ProofOfWork) InitData(nonce int) []byte {
+	difficulty := config.Difficulty()
 	data := bytes.Join([][]byte{
 		pow.PrevHash,
 		pow.Data,
 		ToHex(int64(nonce)),
-		ToHex(int64(Difficulty)),
+		ToHex(int64(difficulty)),
 	}, []byte{})
 
 	return data
