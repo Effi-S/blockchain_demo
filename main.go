@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/pprof"
 	"time"
 
 	"github.com/Effi-S/go-blockchain/blockchain/block"
@@ -32,11 +35,29 @@ func run() {
 	fmt.Printf("took %s\n", time.Since(start))
 }
 
+// Start pprof HTTP server in a goroutine
+func StartPProfServerWithHandler() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", mux))
+	}()
+
+	// (Set mux to nil for default handler)
+}
+
 func main() {
+	StartPProfServerWithHandler()
 	config.SetNumWorkers(20)
+	config.SetDifficulty(30)
 	fmt.Println("Running with 20 workers")
 	run()
-	config.SetNumWorkers(1)
-	fmt.Println("Running with 1 worker")
-	run()
+	// config.SetNumWorkers(1)
+	// fmt.Println("Running with 1 worker")
+	// run()
 }
