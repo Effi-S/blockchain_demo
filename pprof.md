@@ -452,7 +452,7 @@ func profileWithLabels() {
 }
 ```
 
-## Some Examples 
+## Misc. Examples 
 
 ### Example 1: Profile Block Creation
 
@@ -465,7 +465,7 @@ go tool pprof http://localhost:6060/debug/pprof/profile?seconds=30
 (pprof) list NewBlock
 ```
 
-### Example 52: Analyze Worker Efficiency
+### Example 2: Analyze Worker Efficiency
 
 ```bash
 # 1. Enable block profiling (add runtime.SetBlockProfileRate(1))
@@ -487,4 +487,3 @@ go tool pprof http://localhost:6060/debug/pprof/block
 - [Go pprof Documentation](https://golang.org/pkg/net/http/pprof/)
 - [Profiling Go Programs](https://go.dev/blog/pprof)
 - [Dave Cheney's pprof post](https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go)
-- [Flame Graphs](http://www.brendangregg.com/flamegraphs.html)

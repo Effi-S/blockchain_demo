@@ -55,9 +55,6 @@ func main() {
 	StartPProfServerWithHandler()
 	config.SetNumWorkers(20)
 	config.SetDifficulty(30)
-	fmt.Println("Running with 20 workers")
+	fmt.Printf("Running with %d workers\n", config.NumWorkers())
 	run()
-	// config.SetNumWorkers(1)
-	// fmt.Println("Running with 1 worker")
-	// run()
 }
