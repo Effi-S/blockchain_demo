@@ -118,8 +118,8 @@ Brief explanation of the columns and what they mean:
 | Name | Meaning | Example | Example meaning                                                                                                                                                                            
 |--------|---------------|--------|------|
 | flat   | CPU time spent in this function itself (excluding time in functions it called)                  | 328.39s for `RunWorker`         | 328 seconds executing code directly inside `RunWorker` (not inside `SHA256`, `malloc`, etc.)                                                                      |
-| flat%  | `flat` time as a percentage of total profile time.                         | 74.94%                          | Almost ¾ of all CPU time on the machine was spent inside the body of `RunWorker`                                                                                                        |
-| sum%   | sum of  `flat` time up to and including this row                     | 74.94% → 77.50% (top 2 lines)   | The top 2 functions alone account for 77.5% of all CPU time                                                                                                                             |
+| flat%  | `flat` time as a percentage of total profile time.                         | 74.94%                          | Almost $\frac{3}{4}$ of all CPU time on the machine was spent inside the body of `RunWorker`                                                                                                        |
+| sum%   | sum of  `flat` time up to and including this row                     | 74.94% $\to$ 77.50% (top 2 lines)   | The top 2 functions alone account for 77.5% of all CPU time                                                                                                                             |
 | cum    | Total CPU time spent in the function + everything it called (cumulative)                        | 328.39s for `RunWorker`         | Even though `RunWorker` calls `SHA256`, `bytes.Join`, `encoding/binary.Write`, etc., almost all of that time is spent inside `RunWorker` itself → your loop is extremely tight          |
 | cum%   | `cum` time as a percentage of total profile time                                                 | 74.94%                          | Same as `flat%` in this case, meaning `RunWorker` is essentially a leaf function that does almost all the work itself    
 
@@ -395,26 +395,37 @@ peek <regex>        - Show functions matching regex
 
 ### CPU Profile in Code
 
-```go
-import (
+1. **Important:** import  `"runtime/pprof"` not `"net/http/pprof"`
+
+2. Wrap the section you wish to profile and save the profile to a file:
+    ```go
+    import (
     "os"
     "runtime/pprof"
-)
+    )
 
-func profileCPU() {
-    f, err := os.Create("cpu.prof")
-    if err != nil {
-        log.Fatal(err)
+    func profileCPU() {
+        f, err := os.Create("cpu.prof")
+        if err != nil {
+            log.Fatal(err)
+        }
+        defer f.Close()
+        
+        pprof.StartCPUProfile(f)
+        defer pprof.StopCPUProfile()
+        
+        // Your code here
+        run()
+        
     }
-    defer f.Close()
-    
-    pprof.StartCPUProfile(f)
-    defer pprof.StopCPUProfile()
-    
-    // Your code here
-    run()
-}
-```
+    ```
+
+3. Make sure goroutines have time for the profile to run.
+4. You can now use `cpu.prof`:
+    ```bash
+    go tool pprof -http:8080 cpu.prof
+    ```
+
 
 ### Memory Profile in Code
 
@@ -437,7 +448,7 @@ func profileMemory() {
     pprof.WriteHeapProfile(f)
 }
 ```
-
+Now you can run: `go tool pprof -http=:8080 heap.prof`
 ### Custom Profile Labels
 
 ```go
@@ -448,8 +459,7 @@ func profileWithLabels() {
     pprof.SetGoroutineLabels(ctx)
     
     // Your code here
-    pow.RunDistributed(20)
-}
+    run()
 ```
 
 ## Misc. Examples 

@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/pprof"
+	"os"
+	runtime_pprof "runtime/pprof"
 	"time"
 
 	"github.com/Effi-S/go-blockchain/blockchain/block"
@@ -51,10 +53,54 @@ func StartPProfServerWithHandler() {
 	// (Set mux to nil for default handler)
 }
 
+func MemoryProfileRun() {
+	f, err := os.Create("heap.prof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	config.SetNumWorkers(20)
+	config.SetDifficulty(10)
+	fmt.Printf("Running with %d workers\n", config.NumWorkers())
+	run()
+
+	runtime_pprof.WriteHeapProfile(f)
+
+	// Now You can run go tool pprof -http=:8080 heap.prof
+}
+
+func CPUProfileRun() {
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config.SetNumWorkers(20)
+	config.SetDifficulty(20)
+	fmt.Printf("Running with %d workers\n", config.NumWorkers())
+
+	runtime_pprof.StartCPUProfile(f)
+
+	run()
+
+	runtime_pprof.StopCPUProfile()
+	f.Close()
+
+	// Now You can run go tool pprof -http=:8080 cpu.prof
+}
+
 func main() {
+	// 1.  PProf Server
 	StartPProfServerWithHandler()
 	config.SetNumWorkers(20)
 	config.SetDifficulty(30)
 	fmt.Printf("Running with %d workers\n", config.NumWorkers())
 	run()
+
+	// // 2. CPU Run
+	// CPUProfileRun()
+
+	// // 3. RAM Profile
+	// MemoryProfileRun()
 }
